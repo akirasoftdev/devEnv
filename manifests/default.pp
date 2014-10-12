@@ -55,3 +55,41 @@ exec {"extract_eclipse_tar_ball":
 	require => Exec["download_eclipse"],
 	unless => "/usr/bin/test -d /opt/eclipse"
 }
+
+#
+# ユーザ作成
+#
+
+# 日本語キーボード設定
+exec { "add_keyboard_settings_to_bashrc_skelton":
+	command => "/bin/echo 'setxkbmap jp -model jp106' >> /etc/skel/.bashrc",
+	group => "root",
+	user => "root"
+}
+
+# グループ作成
+group { "appdev":
+	gid => 1002,
+	ensure => present
+}
+
+# 開発ユーザ作成
+user { "appdev":
+	ensure => present,
+	home => "/home/appdev",
+	managehome => true,
+	uid => 1002,
+	gid => 1002,
+	shell => "/bin/bash",
+	password => 'SC47T4Dtqt99.',
+	require => Exec["add_keyboard_settings_to_bashrc_skelton"]
+}
+
+# sudo設定
+file {"/etc/sudoers.d/appdev":
+	mode => "0440",
+	owner => "root",
+	group => "root",
+	content => "appdev ALL=(ALL) NOPASSWD:ALL"
+}
+
