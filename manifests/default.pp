@@ -74,6 +74,11 @@ group { "appdev":
 }
 
 # 開発ユーザ作成
+# ユーザ appdevのパスワードは"changeme"です。
+# 生のパスワードを指定することはできないので、
+# SC47…は以下のコマンドで生成しています
+# openssl password changeme
+#
 user { "appdev":
 	ensure => present,
 	home => "/home/appdev",
@@ -82,7 +87,8 @@ user { "appdev":
 	gid => 1002,
 	shell => "/bin/bash",
 	password => 'SC47T4Dtqt99.',
-	require => Exec["add_keyboard_settings_to_bashrc_skelton"]
+	require => [Group["appdev"], Exec["add_keyboard_settings_to_bashrc_skelton"]]
+
 }
 
 # sudo設定
@@ -91,5 +97,59 @@ file {"/etc/sudoers.d/appdev":
 	owner => "root",
 	group => "root",
 	content => "appdev ALL=(ALL) NOPASSWD:ALL"
+}
+
+#
+# アプリケーションの設定を変更する
+#
+
+# gnome terminalのkeybinding
+file { [
+		"/home/appdev/.gconf",
+		"/home/appdev/.gconf/apps",
+		"/home/appdev/.gconf/apps/gnome-terminal",
+		"/home/appdev/.gconf/apps/gnome-terminal/keybindings"
+		]:
+	ensure => "directory",
+	owner => "appdev",
+	group => "appdev",
+	mode => 0700,
+	require => User["appdev"]
+}
+
+file { "/home/appdev/.gconf/apps/gnome-terminal/keybindings/%gconf.xml":
+	source => "/vagrant/files/%gconf.xml",
+	owner => "appdev",
+	group => "appdev",
+	mode => 0600,
+	require => File["/home/appdev/.gconf/apps/gnome-terminal/keybindings"]
+}
+
+# overwrite default application settings
+file { "/home/appdev/.config":
+	ensure => "directory",
+	owner => "appdev",
+	group => "appdev",
+	mode => 0700,
+	require => User["appdev"]
+}
+
+file { [
+		"/home/appdev/.config/lxsession",
+		"/home/appdev/.config/lxsession/Lubuntu"
+		]:
+	ensure => "directory",
+	owner => "appdev",
+	group => "appdev",
+	mode => 0775,
+	require => File["/home/appdev/.config"]
+}	
+
+file { "/home/appdev/.config/lxsession/Lubuntu/desktop.conf":
+	source => "/vagrant/files/desktop.conf",
+	owner => "appdev",
+	group => "appdev",
+	mode => 0660,
+	require => File["/home/appdev/.config/lxsession/Lubuntu"]
 }
 
