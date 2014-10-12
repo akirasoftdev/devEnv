@@ -1,5 +1,16 @@
+#
+# ダウンロード処理
+#
+
 # GUI desktop(lubuntu)のインストール
 package {"lubuntu-desktop": ensure => "installed", install_options => ['--no-install-recommends']}
+
+# gnome-terminal
+package {"gnome-terminal": ensure => "installed"}
+
+# leafpadの代わりにgeditを使う
+package {"gedit": ensure => "installed"}
+
 
 # Android Studioのダウンロード
 exec {"download_android_studio":
