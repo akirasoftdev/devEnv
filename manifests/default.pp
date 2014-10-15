@@ -11,6 +11,13 @@ package {"gnome-terminal": ensure => "installed"}
 # leafpadの代わりにgeditを使う
 package {"gedit": ensure => "installed"}
 
+#
+package {"light-locker": ensure => "purged"}
+package {"xscreensaver": ensure => "installed"}
+package {"default-jdk": ensure => "installed"}
+package {"git": ensure => "installed"}
+package {"git-gui": ensure => "installed"}
+package {"meld": ensure => "installed"}
 
 # Android Studioのダウンロード
 exec {"download_android_studio":
@@ -31,6 +38,7 @@ exec {"download_eclipse":
 	user => "root",
 	group => "root",
 	timeout => 0,
+	logoutput => true,
 	unless => "/usr/bin/test -e /opt/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz"
 }
 
@@ -41,7 +49,7 @@ exec {"extract_android_studio_tar_ball":
 	cwd => "/opt/",
 	user => "root",
 	group => "root",
-	require => Exec["download_android_studio"],
+	logoutput => true,
 	unless => "/usr/bin/test -d /opt/android-studio"
 }
 
@@ -52,7 +60,7 @@ exec {"extract_eclipse_tar_ball":
 	cwd => "/opt/",
 	user => "root",
 	group => "root",
-	require => Exec["download_eclipse"],
+	logoutput => true,
 	unless => "/usr/bin/test -d /opt/eclipse"
 }
 
@@ -153,3 +161,46 @@ file { "/home/appdev/.config/lxsession/Lubuntu/desktop.conf":
 	require => File["/home/appdev/.config/lxsession/Lubuntu"]
 }
 
+
+$repository_array = [
+	"http://download.eclipse.org/releases/luna/",
+	"http://dl.google.com/eclipse/plugin/4.4",
+	"http://mercurialeclipse.eclipselabs.org.codespot.com/hg.wiki/update_site/stable",
+	"http://www.apache.org/dist/ant/ivyde/updatesite/",
+	"http://download.jboss.org/jbosstools/updates/m2eclipse-wtp/",
+	"http://download.eclipse.org/technology/m2e/releases/"]
+$repositories = "${repository_array[0]},${repository_array[1]},${repository_array[2]},${repository_array[3]},${repository_array[4]},${repository_array[5]}"
+
+
+# install com.google.gdt.eclipse.suite.e44.feature
+exec { "com.google.gdt.eclipse.suite.e44.feature":
+	logoutput => true,
+	command => "eclipse -nosplash -application org.eclipse.equinox.p2.director -repository $repositories -installIU com.google.gdt.eclipse.suite.e44.feature.feature.group -tag 'Addded com.google.gdt.eclipse.suite.e44.feature.feature.group'",
+	path => ["/opt/eclipse/","/usr/bin"],
+	cwd => "/opt/",
+	user => "appdev",
+	group => "appdev",
+	unless => "test 0 -eq `find /home/appdev/.eclipse -name 'com.google.gdt.eclipse.suite.e44.feature*'` > /dev/null 2>&1"
+	}	
+
+# install com.google.appengine.eclipse.sdkbundle.feature.feature.group
+exec { "com.google.appengine.eclipse.sdkbundle.feature.feature.group":
+	logoutput => true,
+	command => "eclipse -nosplash -application org.eclipse.equinox.p2.director -repository $repositories -installIU com.google.appengine.eclipse.sdkbundle.feature.feature.group -tag 'Addded com.google.appengine.eclipse.sdkbundle.feature.feature.group'",
+	path => ["/opt/eclipse/","/usr/bin"],
+	cwd => "/opt/",
+	user => "appdev",
+	group => "appdev",
+	unless => "test 0 -eq `find /home/appdev/.eclipse -name 'com.google.appengine.eclipse.sdkbundle.feature*'` > /dev/null 2>&1"
+}
+
+# install com.google.gwt.eclipse.sdkbundle.feature.feature.group
+exec { "com.google.gwt.eclipse.sdkbundle.feature.feature.group":
+	logoutput => true,
+	command => "eclipse -nosplash -application org.eclipse.equinox.p2.director -repository $repositories -installIU com.google.gwt.eclipse.sdkbundle.feature.feature.group -tag 'Addded com.google.gwt.eclipse.sdkbundle.feature.feature.group'",
+	path => ["/opt/eclipse/","/usr/bin"],
+	cwd => "/opt/",
+	user => "appdev",
+	group => "appdev",
+	unless => "test 0 -eq `find /home/appdev/.eclipse -name 'com.google.gwt.eclipse.sdkbundle.feature*'` > /dev/null 2>&1"
+}
