@@ -1,111 +1,152 @@
 #
 # ダウンロード処理
 #
-
-# GUI desktop(lubuntu)のインストール
-package {"lubuntu-desktop": ensure => "installed", install_options => ['--no-install-recommends']}
-
-# gnome-terminal
-package {"gnome-terminal": ensure => "installed"}
-
-# leafpadの代わりにgeditを使う
-package {"gedit": ensure => "installed"}
-
-#
-package {"light-locker": ensure => "purged"}
-package {"xscreensaver": ensure => "installed"}
-package {"default-jdk": ensure => "installed"}
-package {"git": ensure => "installed"}
-package {"git-gui": ensure => "installed"}
-package {"meld": ensure => "installed"}
-
-# Android Studioのダウンロード
-exec {"download_android_studio":
-	command => "wget https://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-linux.tgz",
-	path => "/usr/bin",
-	cwd => "/opt/",
-	user => "root",
-	group => "root",
-	timeout => 0,
-	unless => "/usr/bin/test -e /opt/android-studio-bundle-135.1339820-linux.tgz"
+stage { 'download_files_stage':
+	before => Stage['extract_files_stage']
+}
+stage { 'extract_files_stage':
+	before => Stage['setting_before_user_stage']
+}
+stage { 'setting_before_user_stage':
+	before => Stage['create_user_stage']
+}
+stage { 'create_user_stage':
+	before => Stage['main']
 }
 
-# Eclipseをダウンロード
-exec {"download_eclipse":
-	command => "wget http://ftp.yz.yamagata-u.ac.jp/pub/eclipse//technology/epp/downloads/release/luna/SR1/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz",
-	path => "/usr/bin",
-	cwd => "/opt/",
-	user => "root",
-	group => "root",
-	timeout => 0,
-	logoutput => true,
-	unless => "/usr/bin/test -e /opt/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz"
+class download_files {
+
+	# GUI desktop(lubuntu)のインストール
+	package {"lubuntu-desktop": ensure => "installed", install_options => ['--no-install-recommends']}
+
+	# gnome-terminal
+	package {"gnome-terminal": ensure => "installed"}
+
+	# leafpadの代わりにgeditを使う
+	package {"gedit": ensure => "installed"}
+
+	#
+	package {"light-locker": ensure => "purged"}
+	package {"xscreensaver": ensure => "installed"}
+	package {"default-jdk": ensure => "installed"}
+	package {"git": ensure => "installed"}
+	package {"git-gui": ensure => "installed"}
+	package {"meld": ensure => "installed"}
+
+	# Android Studioのダウンロード
+	exec {"download_android_studio":
+		command => "wget https://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-linux.tgz",
+		path => "/usr/bin",
+		cwd => "/opt/",
+		user => "root",
+		group => "root",
+		timeout => 0,
+		unless => "test -e /opt/android-studio-bundle-135.1339820-linux.tgz"
+	}
+
+	# Eclipseをダウンロード
+	exec {"download_eclipse":
+		command => "wget http://ftp.yz.yamagata-u.ac.jp/pub/eclipse//technology/epp/downloads/release/luna/SR1/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz",
+		path => "/usr/bin",
+		cwd => "/opt/",
+		user => "root",
+		group => "root",
+		timeout => 0,
+		logoutput => true,
+		unless => "test -e /opt/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz"
+	}
 }
 
-# android studioの展開
-exec {"extract_android_studio_tar_ball":
-	command => "tar zxvf android-studio-bundle-135.1339820-linux.tgz",
-	path => "/bin",
-	cwd => "/opt/",
-	user => "root",
-	group => "root",
-	logoutput => true,
-	unless => "/usr/bin/test -d /opt/android-studio"
+class { 'download_files':
+	stage => download_files_stage
 }
 
-# eclipseの展開
-exec {"extract_eclipse_tar_ball":
-	command => "tar zxvf eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz",
-	path => "/bin",
-	cwd => "/opt/",
-	user => "root",
-	group => "root",
-	logoutput => true,
-	unless => "/usr/bin/test -d /opt/eclipse"
+class extract_files {
+	# android studioの展開
+	exec {"extract_android_studio_tar_ball":
+		command => "tar zxvf android-studio-bundle-135.1339820-linux.tgz",
+		path => "/bin",
+		cwd => "/opt/",
+		user => "root",
+		group => "root",
+		logoutput => true,
+		unless => "/usr/bin/test -d /opt/android-studio"
+	}
+
+	# eclipseの展開
+	exec {"extract_eclipse_tar_ball":
+		command => "tar zxvf eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz",
+		path => "/bin",
+		cwd => "/opt/",
+		user => "root",
+		group => "root",
+		logoutput => true,
+		unless => "/usr/bin/test -d /opt/eclipse"
+	}
+}
+
+class { 'extract_files':
+	stage => extract_files_stage
+}
+
+
+class setting_before_user {
+	# 日本語キーボード設定
+	exec { "add_keyboard_settings_to_bashrc_skelton":
+		command => "/bin/echo 'setxkbmap jp -model jp106' >> /etc/skel/.bashrc",
+		group => "root",
+		user => "root",
+		path => "/bin",
+		unless => "grep -c setxkbmap /etc/skel/.bashrc 2> /dev/null"
+	}
+}
+
+class { 'setting_before_user':
+	stage => setting_before_user_stage
 }
 
 #
 # ユーザ作成
 #
+class create_user {
 
-# 日本語キーボード設定
-exec { "add_keyboard_settings_to_bashrc_skelton":
-	command => "/bin/echo 'setxkbmap jp -model jp106' >> /etc/skel/.bashrc",
-	group => "root",
-	user => "root"
+	# グループ作成
+	group { "appdev":
+		gid => 1002,
+		ensure => present
+	}
+
+	# 開発ユーザ作成
+	# ユーザ appdevのパスワードは"changeme"です。
+	# 生のパスワードを指定することはできないので、
+	# SC47…は以下のコマンドで生成しています
+	# openssl password changeme
+	#
+	user { "appdev":
+		ensure => present,
+		home => "/home/appdev",
+		managehome => true,
+		uid => 1002,
+		gid => 1002,
+		shell => "/bin/bash",
+		password => 'SC47T4Dtqt99.',
+		require => Group["appdev"]
+
+	}
+
+	# sudo設定
+	file {"/etc/sudoers.d/appdev":
+		mode => "0440",
+		owner => "root",
+		group => "root",
+		content => "appdev ALL=(ALL) NOPASSWD:ALL"
+	}
 }
 
-# グループ作成
-group { "appdev":
-	gid => 1002,
-	ensure => present
+class {'create_user':
+	stage => create_user_stage
 }
 
-# 開発ユーザ作成
-# ユーザ appdevのパスワードは"changeme"です。
-# 生のパスワードを指定することはできないので、
-# SC47…は以下のコマンドで生成しています
-# openssl password changeme
-#
-user { "appdev":
-	ensure => present,
-	home => "/home/appdev",
-	managehome => true,
-	uid => 1002,
-	gid => 1002,
-	shell => "/bin/bash",
-	password => 'SC47T4Dtqt99.',
-	require => [Group["appdev"], Exec["add_keyboard_settings_to_bashrc_skelton"]]
-
-}
-
-# sudo設定
-file {"/etc/sudoers.d/appdev":
-	mode => "0440",
-	owner => "root",
-	group => "root",
-	content => "appdev ALL=(ALL) NOPASSWD:ALL"
-}
 
 #
 # アプリケーションの設定を変更する
@@ -176,31 +217,31 @@ $repositories = "${repository_array[0]},${repository_array[1]},${repository_arra
 exec { "com.google.gdt.eclipse.suite.e44.feature":
 	logoutput => true,
 	command => "eclipse -nosplash -application org.eclipse.equinox.p2.director -repository $repositories -installIU com.google.gdt.eclipse.suite.e44.feature.feature.group -tag 'Addded com.google.gdt.eclipse.suite.e44.feature.feature.group'",
-	path => ["/opt/eclipse/","/usr/bin"],
+	path => ["/opt/eclipse/","/usr/bin","/bin"],
 	cwd => "/opt/",
 	user => "appdev",
 	group => "appdev",
-	unless => "test 0 -eq `find /home/appdev/.eclipse -name 'com.google.gdt.eclipse.suite.e44.feature*'` > /dev/null 2>&1"
-	}	
+	unless => "/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.gdt.eclipse.suite.e44.feature*\") ]]'"
+}	
 
 # install com.google.appengine.eclipse.sdkbundle.feature.feature.group
 exec { "com.google.appengine.eclipse.sdkbundle.feature.feature.group":
 	logoutput => true,
 	command => "eclipse -nosplash -application org.eclipse.equinox.p2.director -repository $repositories -installIU com.google.appengine.eclipse.sdkbundle.feature.feature.group -tag 'Addded com.google.appengine.eclipse.sdkbundle.feature.feature.group'",
-	path => ["/opt/eclipse/","/usr/bin"],
+	path => ["/opt/eclipse/","/usr/bin","/bin"],
 	cwd => "/opt/",
 	user => "appdev",
 	group => "appdev",
-	unless => "test 0 -eq `find /home/appdev/.eclipse -name 'com.google.appengine.eclipse.sdkbundle.feature*'` > /dev/null 2>&1"
+	unless => "/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.appengine.eclipse.sdkbundle.feature*\") ]]'"
 }
 
 # install com.google.gwt.eclipse.sdkbundle.feature.feature.group
 exec { "com.google.gwt.eclipse.sdkbundle.feature.feature.group":
 	logoutput => true,
 	command => "eclipse -nosplash -application org.eclipse.equinox.p2.director -repository $repositories -installIU com.google.gwt.eclipse.sdkbundle.feature.feature.group -tag 'Addded com.google.gwt.eclipse.sdkbundle.feature.feature.group'",
-	path => ["/opt/eclipse/","/usr/bin"],
+	path => ["/opt/eclipse/","/usr/bin","/bin"],
 	cwd => "/opt/",
 	user => "appdev",
 	group => "appdev",
-	unless => "test 0 -eq `find /home/appdev/.eclipse -name 'com.google.gwt.eclipse.sdkbundle.feature*'` > /dev/null 2>&1"
+	unless => "/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.gwt.eclipse.sdkbundle.feature*\") ]]'"
 }
