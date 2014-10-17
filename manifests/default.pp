@@ -15,29 +15,62 @@ stage { 'create_user_stage':
 # ダウンロード処理
 #
 class download_files {
+	#
+	# default_jdkではなくOracleのJDKをインストールする
+	# このページを参考にした
+	# http://blog.nocturne.net.nz/devops/2013/08/14/provisioning-oracle-java-with-puppet-apply/
+	#
+	$webupd8src = "/etc/apt/sources.list.d/webupd8team.list"
+	file { $webupd8src:
+		content => "deb http://ppa.launchpad.net/webupd8team/java/ubuntu lucid main\ndeb-src http://ppa.launchpad.net/webupd8team/java/ubuntu lucid main\n",
+	} ->
+	exec {"add-webupd80-key":
+		logoutput => true,
+		command => "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886",
+		path => ["/usr/bin/", "/bin/"],
+	} ->
+	exec {"apt-key-update":
+		logoutput => true,
+		command => "apt-key update",
+		path => ["/usr/bin/", "/bin/"],
+	} ->
 	exec {"apt-update":
 		logoutput => true,
-		command => "/usr/bin/apt-get update"
-	}
-
-	Exec["apt-update"] -> Package <| |> -> Exec["download_android_studio"] -> Exec["download_eclipse"]
+		command => "apt-get update",
+		path => "/usr/bin/",
+	} ->
+	exec {"accept-java-license":
+		logoutput => true,
+		command => '/bin/echo /usr/bin/debconf shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections;/bin/echo /usr/bin/debconf shared/accepted-oracle-license-v1-1 seen true | sudo /usr/bin/debconf-set-selections;'
+	} ->
+	package {"oracle-java7-installer": ensure => present} ->
 
 	# GUI desktop(lubuntu)のインストール
-	package {"lubuntu-desktop": ensure => "installed", install_options => ['--no-install-recommends']}
+	package {"lubuntu-desktop":
+		ensure => "installed",
+		install_options => ['--no-install-recommends']
+	} ->
 
 	# gnome-terminal
-	package {"gnome-terminal": ensure => "installed"}
+	package {"gnome-terminal":ensure => "installed"} ->
 
 	# leafpadの代わりにgeditを使う
-	package {"gedit": ensure => "installed"}
+	package {"leafpad":ensure => "purged"} ->
+	package {"gedit": ensure => "installed"} ->
 
-	#
-	package {"light-locker": ensure => "purged", require => Package["lubuntu-desktop"]}
-	package {"xscreensaver": ensure => "installed"}
-	package {"default-jdk": ensure => "installed"}
-	package {"git": ensure => "installed"}
-	package {"git-gui": ensure => "installed"}
-	package {"meld": ensure => "installed"}
+	# 日本語パッケージをインストール
+	package {"language-pack-ja-base": ensure => "installed"} ->
+	package {"language-pack-ja": ensure => "installed"} ->
+
+	# light-lockerだと正常にscreen lockした後に戻れなくなる問題があった。
+	# xscreensaverを代用する
+	package {"light-locker": ensure => "purged"} ->
+	package {"xscreensaver": ensure => "installed"} ->
+
+	# 使用したいアプリをインストールする
+	package {"git": ensure => "installed"} ->
+	package {"git-gui": ensure => "installed"} ->
+	package {"meld": ensure => "installed"} ->
 
 	# Android Studioのダウンロード
 	exec {"download_android_studio":
@@ -49,7 +82,7 @@ class download_files {
 		user => "root",
 		group => "root",
 		unless => "test -e /opt/android-studio-bundle-135.1339820-linux.tgz"
-	}
+	} ->
 
 	# Eclipseをダウンロード
 	exec {"download_eclipse":
@@ -103,10 +136,25 @@ class setting_before_user {
 	# 日本語キーボード設定
 	exec { "add_keyboard_settings_to_bashrc_skelton":
 		command => "/bin/echo 'setxkbmap jp -model jp106' >> /etc/skel/.bashrc",
+		logoutput => true,
 		group => "root",
 		user => "root",
 		path => "/bin",
 		unless => "grep -c setxkbmap /etc/skel/.bashrc 2> /dev/null"
+	}
+	exec { "replace_en_US_2_ja_JP_/etc/default/locale":
+		command => "sed -i 's/en_US/ja_JP/' /etc/default/locale",
+		logoutput => true,
+		group => "root",
+		user => "root",
+		path => "/bin"
+	} ->
+	exec { "replace_en_2_jp_/etc/default/locale":
+		command => "sed -i 's/en/jp/' /etc/default/locale",
+		logoutput => true,
+		group => "root",
+		user => "root",
+		path => "/bin"
 	}
 }
 
@@ -162,53 +210,73 @@ class {'create_user':
 #
 
 # gnome terminalのkeybinding
-file { [
-		"/home/appdev/.gconf",
-		"/home/appdev/.gconf/apps",
-		"/home/appdev/.gconf/apps/gnome-terminal",
-		"/home/appdev/.gconf/apps/gnome-terminal/keybindings"
-		]:
-	ensure => "directory",
-	owner => "appdev",
-	group => "appdev",
-	mode => 0700,
-	require => User["appdev"]
-}
+#file { [
+#		"/home/appdev/.gconf",
+#		"/home/appdev/.gconf/apps",
+#		"/home/appdev/.gconf/apps/gnome-terminal",
+#		"/home/appdev/.gconf/apps/gnome-terminal/keybindings"
+#		]:
+#	ensure => "directory",
+#	owner => "appdev",
+#	group => "appdev",
+#	mode => 0700,
+#	require => User["appdev"]
+#}
 
-file { "/home/appdev/.gconf/apps/gnome-terminal/keybindings/%gconf.xml":
-	source => "/vagrant/files/%gconf.xml",
-	owner => "appdev",
-	group => "appdev",
-	mode => 0600,
-	require => File["/home/appdev/.gconf/apps/gnome-terminal/keybindings"]
-}
+#file { "/home/appdev/.gconf/apps/gnome-terminal/keybindings/%gconf.xml":
+#	source => "/vagrant/files/%gconf.xml",
+#	owner => "appdev",
+#	group => "appdev",
+#	mode => 0600,
+#	require => File["/home/appdev/.gconf/apps/gnome-terminal/keybindings"]
+#}
 
 # overwrite default application settings
-file { "/home/appdev/.config":
+#file { "/home/appdev/.config":
+#	ensure => "directory",
+#	owner => "appdev",
+#	group => "appdev",
+#	mode => 0700,
+#	require => User["appdev"]
+#}
+
+#file { [
+#		"/home/appdev/.config/lxsession",
+#		"/home/appdev/.config/lxsession/Lubuntu"
+#		]:
+#	ensure => "directory",
+#	owner => "appdev",
+#	group => "appdev",
+#	mode => 0775,
+#	require => File["/home/appdev/.config"]
+#}	
+
+#file { "/home/appdev/.config/lxsession/Lubuntu/desktop.conf":
+#	source => "/vagrant/files/desktop.conf",
+#	owner => "appdev",
+#	group => "appdev",
+#	mode => 0660,
+#	require => File["/home/appdev/.config/lxsession/Lubuntu"]
+#}
+
+file {"/home/appdev/Desktop":
 	ensure => "directory",
 	owner => "appdev",
-	group => "appdev",
-	mode => 0700,
-	require => User["appdev"]
-}
-
-file { [
-		"/home/appdev/.config/lxsession",
-		"/home/appdev/.config/lxsession/Lubuntu"
-		]:
-	ensure => "directory",
+	group => "appdev"
+} ->
+file {"/home/appdev/Desktop/Android Studio.desktop":
+	source => "/vagrant/files/Android Studio.desktop",
 	owner => "appdev",
 	group => "appdev",
 	mode => 0775,
-	require => File["/home/appdev/.config"]
-}	
-
-file { "/home/appdev/.config/lxsession/Lubuntu/desktop.conf":
-	source => "/vagrant/files/desktop.conf",
+	require => File["/home/appdev/Desktop"]
+}
+file {"/home/appdev/Desktop/Eclipse.desktop":
+	source => "/vagrant/files/Eclipse.desktop",
 	owner => "appdev",
 	group => "appdev",
-	mode => 0660,
-	require => File["/home/appdev/.config/lxsession/Lubuntu"]
+	mode => 0775,
+	require => File["/home/appdev/Desktop"]
 }
 
 
@@ -232,7 +300,7 @@ exec { "com.google.gdt.eclipse.suite.e44.feature":
 	user => "appdev",
 	group => "appdev",
 	unless => "/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.gdt.eclipse.suite.e44.feature*\") ]]'"
-}	
+}
 
 # install com.google.appengine.eclipse.sdkbundle.feature.feature.group
 exec { "com.google.appengine.eclipse.sdkbundle.feature.feature.group":
@@ -263,15 +331,14 @@ class timezone_setting {
 	file { '/etc/timezone':
 		ensure => present,
 		content => "Asia/Tokyo\n"
-	}
+	} ->
 	exec { 'reconfigure-tzdata':
 		user => root,
 		group => root,
 		command => '/usr/sbin/dpkg-reconfigure --frontend noninteractive tzdata'
-	}
+	} ->
 	notify { 'timezone-changed':
 		message => 'Timezone was updated to Asia/Tokyo'
 	}
-	File['/etc/timezone'] -> Exec['reconfigure-tzdata'] -> Notify['timezone-changed']
 }
 include timezone_setting
