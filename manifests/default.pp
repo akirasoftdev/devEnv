@@ -1,6 +1,3 @@
-#
-# ダウンロード処理
-#
 stage { 'download_files_stage':
 	before => Stage['extract_files_stage']
 }
@@ -14,7 +11,16 @@ stage { 'create_user_stage':
 	before => Stage['main']
 }
 
+#
+# ダウンロード処理
+#
 class download_files {
+	exec {"apt-update":
+		logoutput => true,
+		command => "/usr/bin/apt-get update"
+	}
+
+	Exec["apt-update"] -> Package <| |> -> Exec["download_android_studio"] -> Exec["download_eclipse"]
 
 	# GUI desktop(lubuntu)のインストール
 	package {"lubuntu-desktop": ensure => "installed", install_options => ['--no-install-recommends']}
@@ -26,7 +32,7 @@ class download_files {
 	package {"gedit": ensure => "installed"}
 
 	#
-	package {"light-locker": ensure => "purged"}
+	package {"light-locker": ensure => "purged", require => Package["lubuntu-desktop"]}
 	package {"xscreensaver": ensure => "installed"}
 	package {"default-jdk": ensure => "installed"}
 	package {"git": ensure => "installed"}
@@ -36,23 +42,24 @@ class download_files {
 	# Android Studioのダウンロード
 	exec {"download_android_studio":
 		command => "wget https://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-linux.tgz",
+		logoutput => true,
+		timeout => 0,
 		path => "/usr/bin",
 		cwd => "/opt/",
 		user => "root",
 		group => "root",
-		timeout => 0,
 		unless => "test -e /opt/android-studio-bundle-135.1339820-linux.tgz"
 	}
 
 	# Eclipseをダウンロード
 	exec {"download_eclipse":
 		command => "wget http://ftp.yz.yamagata-u.ac.jp/pub/eclipse//technology/epp/downloads/release/luna/SR1/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz",
+		logoutput => true,
+		timeout => 0,
 		path => "/usr/bin",
 		cwd => "/opt/",
 		user => "root",
 		group => "root",
-		timeout => 0,
-		logoutput => true,
 		unless => "test -e /opt/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz"
 	}
 }
@@ -65,22 +72,24 @@ class extract_files {
 	# android studioの展開
 	exec {"extract_android_studio_tar_ball":
 		command => "tar zxvf android-studio-bundle-135.1339820-linux.tgz",
+		logoutput => true,
+		timeout => 0,
 		path => "/bin",
 		cwd => "/opt/",
 		user => "root",
 		group => "root",
-		logoutput => true,
 		unless => "/usr/bin/test -d /opt/android-studio"
 	}
 
 	# eclipseの展開
 	exec {"extract_eclipse_tar_ball":
 		command => "tar zxvf eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz",
+		logoutput => true,
+		timeout => 0,
 		path => "/bin",
 		cwd => "/opt/",
 		user => "root",
 		group => "root",
-		logoutput => true,
 		unless => "/usr/bin/test -d /opt/eclipse"
 	}
 }
@@ -216,6 +225,7 @@ $repositories = "${repository_array[0]},${repository_array[1]},${repository_arra
 # install com.google.gdt.eclipse.suite.e44.feature
 exec { "com.google.gdt.eclipse.suite.e44.feature":
 	logoutput => true,
+	timeout => 0,
 	command => "eclipse -nosplash -application org.eclipse.equinox.p2.director -repository $repositories -installIU com.google.gdt.eclipse.suite.e44.feature.feature.group -tag 'Addded com.google.gdt.eclipse.suite.e44.feature.feature.group'",
 	path => ["/opt/eclipse/","/usr/bin","/bin"],
 	cwd => "/opt/",
@@ -227,21 +237,41 @@ exec { "com.google.gdt.eclipse.suite.e44.feature":
 # install com.google.appengine.eclipse.sdkbundle.feature.feature.group
 exec { "com.google.appengine.eclipse.sdkbundle.feature.feature.group":
 	logoutput => true,
+	timeout => 0,
 	command => "eclipse -nosplash -application org.eclipse.equinox.p2.director -repository $repositories -installIU com.google.appengine.eclipse.sdkbundle.feature.feature.group -tag 'Addded com.google.appengine.eclipse.sdkbundle.feature.feature.group'",
 	path => ["/opt/eclipse/","/usr/bin","/bin"],
 	cwd => "/opt/",
 	user => "appdev",
 	group => "appdev",
-	unless => "/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.appengine.eclipse.sdkbundle.feature*\") ]]'"
+	unless => ["/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.appengine.eclipse.sdkbundle.feature*\") ]]'","/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.gdt.eclipse.suite.e44.feature*\") ]]'"]
 }
 
 # install com.google.gwt.eclipse.sdkbundle.feature.feature.group
 exec { "com.google.gwt.eclipse.sdkbundle.feature.feature.group":
 	logoutput => true,
+	timeout => 0,
 	command => "eclipse -nosplash -application org.eclipse.equinox.p2.director -repository $repositories -installIU com.google.gwt.eclipse.sdkbundle.feature.feature.group -tag 'Addded com.google.gwt.eclipse.sdkbundle.feature.feature.group'",
 	path => ["/opt/eclipse/","/usr/bin","/bin"],
 	cwd => "/opt/",
 	user => "appdev",
 	group => "appdev",
-	unless => "/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.gwt.eclipse.sdkbundle.feature*\") ]]'"
+	unless => ["/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.gwt.eclipse.sdkbundle.feature*\") ]]'","/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.gdt.eclipse.suite.e44.feature*\") ]]'"]
 }
+
+
+class timezone_setting {
+	file { '/etc/timezone':
+		ensure => present,
+		content => "Asia/Tokyo\n"
+	}
+	exec { 'reconfigure-tzdata':
+		user => root,
+		group => root,
+		command => '/usr/sbin/dpkg-reconfigure --frontend noninteractive tzdata'
+	}
+	notify { 'timezone-changed':
+		message => 'Timezone was updated to Asia/Tokyo'
+	}
+	File['/etc/timezone'] -> Exec['reconfigure-tzdata'] -> Notify['timezone-changed']
+}
+include timezone_setting
