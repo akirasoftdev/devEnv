@@ -1,11 +1,13 @@
 import 'classes/*'
 
-stage { 'preinstall-stage': before => Stage['install-fundamental-software'] }
-stage { 'install-fundamental-software': before => Stage['install-software'] }
-stage { 'install-software': before => Stage['install-plugins'] }
-stage { 'install-plugins': before => Stage['system-settings'] }
-stage { 'system-settings': before => Stage['create-users'] }
-stage { 'create-users': before => Stage['main'] }
+stage { 'preinstall-stage': } ->
+stage { 'install-fundamental-software': } ->
+stage { 'install-software': } ->
+stage { 'install-plugins': } ->
+stage { 'system-settings': } ->
+stage { 'create-users':
+	before => Stage['main']
+}
 
 class preinstall {
 	exec {'apt-update':
@@ -15,12 +17,15 @@ class preinstall {
 	}
 }
 class { 'preinstall': stage => preinstall-stage }
+
 class { 'lubuntu-packages': stage => install-fundamental-software }
-class { 'oraclejdk' : stage => install-fundamental-software }
+class { 'oraclejdk' :       stage => install-fundamental-software }
+
 class { 'android-studio': stage => install-software }
-class { 'eclipse' : stage=> install-software }
-class { 'eclipse-gae-plugin' : stage => install-plugins }
+class { 'eclipse' :       stage=> install-software }
+
 class { 'locale-settings' : stage => system-settings }
+
 class { 'user-appdev' : stage => create-users }
 
 
@@ -29,6 +34,7 @@ package {"git": ensure => "installed"} ->
 package {"git-gui": ensure => "installed"} ->
 package {"meld": ensure => "installed"}
 
+include eclipse-gae-plugin
 
 #
 # アプリケーションの設定を変更する

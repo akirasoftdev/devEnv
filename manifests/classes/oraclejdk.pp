@@ -6,7 +6,7 @@
 class oraclejdk {
 	$webupd8src = '/etc/apt/sources.list.d/webupd8team.list'
 	file { $webupd8src:
-		content => 'deb http://ppa.launchpad.net/webupd8team/java/ubuntu lucid main\ndeb-src http://ppa.launchpad.net/webupd8team/java/ubuntu lucid main\n',
+		content => "deb http://ppa.launchpad.net/webupd8team/java/ubuntu lucid main\ndeb-src http://ppa.launchpad.net/webupd8team/java/ubuntu lucid main\n",
 	} ->
 	exec {'add-webupd80-key':
 		logoutput => true,
