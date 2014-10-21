@@ -1,12 +1,5 @@
 class eclipse-gae-plugin {
-	$repository_array = [
-		"http://download.eclipse.org/releases/luna/",
-		"http://dl.google.com/eclipse/plugin/4.4",
-		"http://mercurialeclipse.eclipselabs.org.codespot.com/hg.wiki/update_site/stable",
-		"http://www.apache.org/dist/ant/ivyde/updatesite/",
-		"http://download.jboss.org/jbosstools/updates/m2eclipse-wtp/",
-		"http://download.eclipse.org/technology/m2e/releases/"]
-	$repositories = "${repository_array[0]},${repository_array[1]},${repository_array[2]},${repository_array[3]},${repository_array[4]},${repository_array[5]}"
+	$repositories = "http://download.eclipse.org/releases/luna/,http://dl.google.com/eclipse/plugin/4.4"
 
 
 	# install com.google.gdt.eclipse.suite.e44.feature
