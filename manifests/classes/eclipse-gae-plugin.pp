@@ -11,7 +11,6 @@ class eclipse-gae-plugin {
 		cwd => "/opt/",
 		user => "appdev",
 		group => "appdev",
-		unless => "/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.gdt.eclipse.suite.e44.feature*\") ]]'"
 	} ->
 
 	# install com.google.appengine.eclipse.sdkbundle.feature.feature.group
@@ -23,7 +22,6 @@ class eclipse-gae-plugin {
 		cwd => "/opt/",
 		user => "appdev",
 		group => "appdev",
-		unless => ["/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.appengine.eclipse.sdkbundle.feature*\") ]]'","/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.gdt.eclipse.suite.e44.feature*\") ]]'"]
 	} ->
 
 	# install com.google.gwt.eclipse.sdkbundle.feature.feature.group
@@ -35,7 +33,6 @@ class eclipse-gae-plugin {
 		cwd => "/opt/",
 		user => "appdev",
 		group => "appdev",
-		unless => ["/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.gwt.eclipse.sdkbundle.feature*\") ]]'","/bin/bash -c '[[ -n $(find /home/appdev/.eclipse -name \"com.google.gdt.eclipse.suite.e44.feature*\") ]]'"]
 	}
 
 }
