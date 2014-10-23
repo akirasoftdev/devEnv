@@ -35,6 +35,7 @@ package {"git-gui": ensure => "installed"} ->
 package {"meld": ensure => "installed"}
 
 include eclipse-gae-plugin
+include google-chrome
 
 #
 # アプリケーションの設定を変更する
