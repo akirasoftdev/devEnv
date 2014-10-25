@@ -36,6 +36,7 @@ package {"meld": ensure => "installed"}
 
 include eclipse-gae-plugin
 include google-chrome
+include sublime-text2
 
 #
 # アプリケーションの設定を変更する
