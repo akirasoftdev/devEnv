@@ -26,6 +26,16 @@ class locale-settings {
 		user => "root",
 		path => "/bin"
 	} ->
+	exec { "replace XKBMODEL":
+		command => "sed -i 's/pc105/jp106/' /etc/default/keyboard",
+		logoutput => true,
+		path => "/bin"
+	} ->
+	exec { "replace XKBLAYOUT":
+		command => "sed -i 's/us/jp/' /etc/default/keyboard",
+		logoutput => true,
+		path => "/bin"
+	}
 	file { '/etc/timezone':
 		ensure => present,
 		content => "Asia/Tokyo\n"
