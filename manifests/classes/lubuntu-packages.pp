@@ -16,5 +16,6 @@ class lubuntu-packages {
 	package {"gedit": ensure => "installed"} ->
 
 	# gnome-terminal
+	package {"lxterminal": ensure=> "purged"}->
 	package {"gnome-terminal": ensure => "installed"}
 }
