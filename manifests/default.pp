@@ -39,3 +39,4 @@ include google-chrome
 include sublime-text2
 include golang
 include liteide
+include create-workspace-slim3
