@@ -8,14 +8,14 @@ class lubuntu-packages {
 
 	# light-lockerだと正常にscreen lockした後に戻れなくなる問題があった。
 	# xscreensaverを代用する
-	package {"light-locker": ensure => "purged"} ->
-	package {"xscreensaver": ensure => "installed"} ->
+	package {'light-locker': ensure => purged} ->
+	package {'xscreensaver': ensure => installed} ->
 
 	# leafpadの代わりにgeditを使う
-	package {"leafpad:": ensure  => "purged"} ->
-	package {"gedit": ensure => "installed"} ->
+	package {'leafpad': ensure  => purged} ->
+	package {'gedit': ensure => installed} ->
 
 	# gnome-terminal
-	package {"lxterminal": ensure=> "purged"}->
-	package {"gnome-terminal": ensure => "installed"}
+	package {'lxterminal': ensure=> 'purged'}->
+	package {'gnome-terminal': ensure => 'installed'}
 }

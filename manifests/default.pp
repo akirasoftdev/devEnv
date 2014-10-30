@@ -30,12 +30,11 @@ class { 'user-appdev' : stage => create-users }
 
 
 # 使用したいアプリをインストールする
-package {"git": ensure => "installed"} ->
-package {"git-gui": ensure => "installed"} ->
-package {"meld": ensure => "installed"}
+package {'git': ensure => installed} ->
+package {'git-gui': ensure => 'installed'} ->
+package {'meld': ensure => 'installed'}
 
 include eclipse-gae-plugin
-include slim3-plugin
 include google-chrome
 include sublime-text2
 include golang
