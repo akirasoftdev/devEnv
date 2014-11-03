@@ -67,8 +67,15 @@ class user-appdev {
 #		mode => 0664,
 #		content => 'en_US'
 #	} ->
+
 	file {"/home/appdev/.config/user-dirs.locale":
 		ensure => absent
+	} ->
+
+	dconf::set {"/desktop/ibus/general/hotkey/triggers":
+		value => "['Zenkaku_Hankaku']",
+		user => 'appdev',
+		group => 'appdev',
 	}
 
 }

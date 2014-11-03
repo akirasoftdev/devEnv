@@ -22,7 +22,8 @@ class { 'lubuntu-packages': stage => install-fundamental-software }
 class { 'oraclejdk' :       stage => install-fundamental-software }
 
 class { 'android-studio': stage => install-software }
-class { 'eclipse' :       stage=> install-software }
+class { 'eclipse' :       stage => install-software }
+class { 'dconf':          stage => install-software }
 
 class { 'locale-settings' : stage => system-settings }
 
@@ -31,8 +32,9 @@ class { 'user-appdev' : stage => create-users }
 
 # 使用したいアプリをインストールする
 package {'git': ensure => installed} ->
-package {'git-gui': ensure => 'installed'} ->
-package {'meld': ensure => 'installed'}
+package {'git-gui': ensure => installed} ->
+package {'meld': ensure => installed}
+package {'ant': ensure => installed}
 
 include eclipse-gae-plugin
 include google-chrome
