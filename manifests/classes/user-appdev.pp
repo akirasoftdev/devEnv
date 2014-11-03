@@ -60,13 +60,6 @@ class user-appdev {
 		group => "appdev",
 		path => "/usr/bin",
 	} ->
-		
-#	file {"/home/appdev/.config/user-dirs.locale":
-#		owner => "appdev",
-#		group => "appdev",
-#		mode => 0664,
-#		content => 'en_US'
-#	} ->
 
 	file {"/home/appdev/.config/user-dirs.locale":
 		ensure => absent
