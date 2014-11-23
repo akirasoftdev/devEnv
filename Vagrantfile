@@ -86,6 +86,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # You will need to create the manifests directory and a manifest in
   # the file default.pp in the manifests_path directory.
   #
+  config.vm.provision :shell do |shell|
+  	shell.inline = "mkdir -p /etc/puppet/modules;
+  					puppet module install jproyo-archive"
+  end
+
   config.vm.provision "puppet" do |puppet|
     puppet.manifests_path = "manifests"
     puppet.manifest_file  = "default.pp"
