@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 import 'classes/*'
 
 stage { 'preinstall-stage': } ->

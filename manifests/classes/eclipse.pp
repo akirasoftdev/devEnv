@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 class eclipse {
 	# Eclipseをダウンロード
 	exec {'download_eclips':

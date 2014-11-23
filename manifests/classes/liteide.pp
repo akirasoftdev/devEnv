@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 class liteide {
 	exec {'download_liteide':
 		command => 'wget http://jaist.dl.sourceforge.net/project/liteide/X24/liteidex24.linux-64.tar.bz2',

@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 class golang {
 	exec {'download_golang':
 		command => 'wget https://storage.googleapis.com/golang/go1.3.3.linux-amd64.tar.gz',

@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 class google-chrome {
 	$chrome_list = '/etc/apt/sources.list.d/google-chrome.list'
 	exec {'install-google-key':

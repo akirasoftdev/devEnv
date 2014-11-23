@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 class android-studio {
 	# Android Studioのダウンロード
 	exec {'download_android_studio':
