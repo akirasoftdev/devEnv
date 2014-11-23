@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 class eclipse-gae-plugin {
 	$repositories = 'http://download.eclipse.org/releases/luna/,http://dl.google.com/eclipse/plugin/4.4,http://slim3.googlecode.com/svn/updates/'
 

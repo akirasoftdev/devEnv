@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 class locale-settings {
 	# 日本語パッケージをインストール
 	package {'language-pack-ja-base': ensure => installed} ->
