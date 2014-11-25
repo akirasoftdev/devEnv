@@ -1,3 +1,5 @@
+#coding:utf-8
+
 class user-appdev {
 	# グループ作成
 	group { "appdev":

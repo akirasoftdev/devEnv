@@ -1,3 +1,5 @@
+#coding:utf-8
+
 class sublime-text2 {
 	exec {'download-sublime-text2':
 		command => 'wget http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%202.0.2%20x64.tar.bz2',

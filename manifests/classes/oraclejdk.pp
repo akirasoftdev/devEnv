@@ -1,3 +1,5 @@
+#coding:utf-8
+
 #
 # default_jdkではなくOracleのJDKをインストールする
 # このページを参考にした
