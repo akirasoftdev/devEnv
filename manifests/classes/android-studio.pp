@@ -1,4 +1,4 @@
-# encoding: UTF-8
+#coding:utf-8
 
 class android-studio {
 	# Android Studioのダウンロード

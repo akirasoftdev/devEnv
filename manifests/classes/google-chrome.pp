@@ -1,4 +1,4 @@
-# encoding: UTF-8
+#coding:utf-8
 
 class google-chrome {
 	$chrome_list = '/etc/apt/sources.list.d/google-chrome.list'
