@@ -30,8 +30,6 @@ class { 'locale-settings' : stage => system-settings }
 
 class { 'user-appdev' : stage => create-users }
 
-
-# 使用したいアプリをインストールする
 package {'git': ensure => installed} ->
 package {'git-gui': ensure => 'installed'} ->
 package {'meld': ensure => 'installed'}

@@ -1,7 +1,7 @@
 #coding:utf-8
 
 class locale-settings {
-	# 日本語パッケージをインストール
+
 	package {'language-pack-ja-base': ensure => installed} ->
 	package {'language-pack-ja': ensure => installed} ->
 	package {'ibus-mozc': ensure => installed} ->
