@@ -10,13 +10,6 @@ class create-workspace-slim3 {
 		unless => 'test -e /home/appdev/master.zip'
 	} ->
 
-	file { '/home/appdev/workspace':
-		ensure => 'directory',
-		owner => 'appdev',
-		group => 'appdev',
-		mode => '0775',
-	} ->
-
 	exec { 'extract-workspace-slim3':
 		logoutput => true,
 		timeout => 0,
@@ -37,5 +30,13 @@ class create-workspace-slim3 {
 		group => 'appdev',
 		cwd => '/home/appdev',
 		path => '/bin'
+	} ->
+
+	file { '/home/appdev/workspace':
+		ensure => 'directory',
+		owner => 'appdev',
+		group => 'appdev',
+		mode => '0775',
 	}
+
 }
