@@ -2,15 +2,15 @@
 
 class liteide {
 	exec {'download_liteide':
-		command => 'wget http://jaist.dl.sourceforge.net/project/liteide/X24/liteidex24.linux-64.tar.bz2',
+		command => 'wget http://jaist.dl.sourceforge.net/project/liteide/X24.3/liteidex24.3.linux-64.tar.bz2',
 		timeout => 0,
 		path => '/usr/bin',
 		cwd => '/opt/',
-		unless => 'test -e /opt/liteidex24.linux-64.tar.bz2',
+		unless => 'test -e /opt/liteidex24.3.linux-64.tar.bz2',
 	} ->
 	
 	exec {'extract_liteide_tar_ball':
-		command => 'tar jxvf liteidex24.linux-64.tar.bz2',
+		command => 'tar jxvf liteidex24.3.linux-64.tar.bz2',
 		timeout => 0,
 		path => ['/bin','/usr/bin'],
 		cwd => '/opt/',
