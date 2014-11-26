@@ -1,10 +1,5 @@
 #coding:utf-8
 
-#
-# default_jdkではなくOracleのJDKをインストールする
-# このページを参考にした
-# http://blog.nocturne.net.nz/devops/2013/08/14/provisioning-oracle-java-with-puppet-apply/
-#
 class oraclejdk {
 	$webupd8src = '/etc/apt/sources.list.d/webupd8team.list'
 	file { $webupd8src:
