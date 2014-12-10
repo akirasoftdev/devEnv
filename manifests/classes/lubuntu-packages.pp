@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 class lubuntu-packages {
 
 	# GUI desktop(lubuntu)のインストール
