@@ -23,7 +23,13 @@ class create-workspace-slim3 {
 	file { '/home/appdev/master.zip':
 		ensure => absent
 	} ->
-	
+
+	exec {'remove workspace':
+		command => "rm -rf workspace",
+		cwd => "/home/appdev",
+		path => "/bin:/usr/bin"
+	} ->
+
 	exec { 'rename-workspace':
 		command => 'mv workspace_for_slim3-master workspace',
 		user => 'appdev',
