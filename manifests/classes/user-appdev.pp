@@ -69,6 +69,10 @@ class user-appdev {
 		value => "['Zenkaku_Hankaku']",
 		user => 'appdev',
 		group => 'appdev',
-	}
+	} ->
 
+	exec {"chown appdev":
+		command => "chown -R appdev:appdev /opt/android-studio",
+		path => "/usr/bin:/bin",
+	}
 }
